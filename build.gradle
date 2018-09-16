@@ -13,7 +13,9 @@ repositories {
 
 dependencies {
 
-    compile 'redis.clients:jedis:2.1.0'
+    // https://mvnrepository.com/artifact/redis.clients/jedis
+    compile group: 'redis.clients', name: 'jedis', version: '2.9.0'
+
     compile 'org.javatuples:javatuples:1.2'
     compile 'com.google.code.gson:gson:2.2.2'
 
