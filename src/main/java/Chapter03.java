@@ -16,15 +16,16 @@ public class Chapter03 {
         new Chapter03().run();
     }
 
-    public void run(){
+    private void run(){
         Jedis conn = new Jedis("localhost");
         //string(conn);
-        list(conn);
+//        list(conn);
+        set(conn);
     }
 
-    public void string(Jedis conn){
+    private void string(Jedis conn){
         conn.del("key");
-        System.out.println("====自增自减=====");
+        System.out.println("====字符串常用命令=====");
         String key = conn.get("key");
         System.out.println("key = "+ key);
         Long incr = conn.incr("key");
@@ -39,7 +40,6 @@ public class Chapter03 {
         System.out.println(decr4 + " + 22.03 = " + incrByFloat);
 
         conn.del("new-string-key");
-        System.out.println("=====字符串的命令====");
         conn.append("new-string-key", "hello");
         conn.append("new-string-key", " world!");
         String hellworld = conn.get("new-string-key");
@@ -57,7 +57,8 @@ public class Chapter03 {
 
     }
 
-    public void list(Jedis conn){
+    private void list(Jedis conn){
+        System.out.println("=====列表常用命令=====");
         conn.del("list-key");
         conn.lpush("list-key", "1");
         System.out.println(conn.lrange("list-key", 0, -1));
@@ -95,5 +96,15 @@ public class Chapter03 {
             conn.rpoplpush("new-list-key3", "new-list-key4");
         }
         System.out.println(conn.lrange("new-list-key4", 0,-1));
+    }
+
+    private void set(Jedis conn){
+        System.out.println("======集合常用命令=====");
+        conn.del("set-key");
+        //sadd 向集合里添加元素（一个或者多个），返回插入元素非重复的个数
+        Long sadd = conn.sadd("set-key", "a", "b", "c");
+        System.out.println(sadd);
+        Long d = conn.sadd("set-key", "c");
+        System.out.println(d);
     }
 }
