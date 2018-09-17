@@ -1,6 +1,7 @@
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author: 徐东强
@@ -122,6 +123,27 @@ public class Chapter03 {
         Long a = conn.smove("new-set-key", "set-set-key", "a");
         assert a==1;
         System.out.println("=====用于组合和处理多集合的命令=====");
-
+        conn.del("new-set-key-1");
+        conn.del("new-set-key-2");
+        conn.del("new-set-key-3");
+        conn.del("new-set-key-4");
+        conn.del("new-set-key-5");
+        conn.sadd("new-set-key-1","first", "second", "one", "two", "three");
+        conn.sadd("new-set-key-2", "one", "two", "second");
+        Set<String> sdiff12 = conn.sdiff("new-set-key-1", "new-set-key-2");
+        System.out.println(conn.smembers("new-set-key-1") + " - " + conn.smembers("new-set-key-2") + " = " + sdiff12);
+        Set<String> sdiff21 = conn.sdiff("new-set-key-2", "new-set-key-1");
+        System.out.println(conn.smembers("new-set-key-2") + " - " + conn.smembers("new-set-key-1") + " = " + sdiff21);
+        conn.sdiffstore("new-set-key-3", "new-set-key-1", "new-set-key-2");
+        assert Objects.equals(new HashSet<>(Arrays.asList("first", "three")), conn.smembers("new-set-key-3"));
+        System.out.println("new-set-key-3:" + conn.smembers("new-set-key-3"));
+        Set<String> sinter12 = conn.sinter("new-set-key-1", "new-set-key-2");
+        System.out.println(conn.smembers("new-set-key-1") + "交集" + conn.smembers("new-set-key-2") + " = " + sinter12);
+        conn.sinterstore("new-set-key-4", "new-set-key-1", "new-set-key-2");
+        System.out.println("new-set-key-4:" + conn.smembers("new-set-key-4"));
+        Set<String> sunion = conn.sunion("new-set-key-1", "new-set-key-2");
+        System.out.println(conn.smembers("new-set-key-1") + "并集" + conn.smembers("new-set-key-2") + " = " + sunion);
+        conn.sunionstore("new-set-key-5", "new-set-key-1", "new-set-key-2");
+        System.out.println("new-set-key-5:" + conn.smembers("new-set-key-5"));
     }
 }
