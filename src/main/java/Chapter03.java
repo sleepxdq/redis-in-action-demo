@@ -166,5 +166,17 @@ public class Chapter03 {
         System.out.println(hgetAll);
         conn.hdel("new-hash-key1", "name");
         assert conn.hlen("new-hash-key1") == 1;
+        assert conn.hexists("new-hash-key1", "age");
+        List<String> hkeys = new ArrayList<>(conn.hkeys("new-hash-key2"));
+        List<String> hvals = conn.hvals("new-hash-key2");
+        for (int i = 0; i < hvals.size(); i++){
+            System.out.println("key: " + hkeys.get(i) + ",value: " + hvals.get(i));
+        }
+        Map<String, String> keyValues = conn.hgetAll("new-hash-key2");
+        keyValues.forEach((k,v) -> System.out.println(k + ": " + v));
+        conn.hincrBy("new-hash-key2", "age", 1);
+        assert Objects.equals("2", conn.hget("new-hash-key2", "age"));
+        conn.hincrByFloat("new-hash-key2", "age", 0.0D);
+        assert Objects.equals("2.0", conn.hget("new-hash-key2", "age"));
     }
 }
