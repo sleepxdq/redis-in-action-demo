@@ -1,7 +1,6 @@
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author: 徐东强
@@ -18,7 +17,8 @@ public class Chapter03 {
         Jedis conn = new Jedis("localhost");
         //string(conn);
 //        list(conn);
-        set(conn);
+//        set(conn);
+        hash(conn);
     }
 
     private void string(Jedis conn){
@@ -145,5 +145,26 @@ public class Chapter03 {
         System.out.println(conn.smembers("new-set-key-1") + "并集" + conn.smembers("new-set-key-2") + " = " + sunion);
         conn.sunionstore("new-set-key-5", "new-set-key-1", "new-set-key-2");
         System.out.println("new-set-key-5:" + conn.smembers("new-set-key-5"));
+    }
+
+    private void hash(Jedis conn){
+        conn.del("new-hash-key1");
+        conn.del("new-hash-key2");
+        System.out.println("=====散列的API命令=====");
+        conn.hset("new-hash-key1", "name", "xdq");
+        conn.hset("new-hash-key1", "age", "11");
+        Map<String, String> map = new HashMap<>(4);
+        map.put("name", "xdq");
+        map.put("age", "11");
+        conn.hmset("new-hash-key2", map);
+        List<String> hmget = conn.hmget("new-hash-key1", "name", "age");
+        List<String> hget = Arrays.asList(conn.hget("new-hash-key2", "name"),
+                conn.hget("new-hash-key2", "age"));
+        assert Objects.equals(hget, hmget);
+        System.out.println(hmget);
+        Map<String, String> hgetAll = conn.hgetAll("new-hash-key1");
+        System.out.println(hgetAll);
+        conn.hdel("new-hash-key1", "name");
+        assert conn.hlen("new-hash-key1") == 1;
     }
 }
