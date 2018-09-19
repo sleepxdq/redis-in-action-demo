@@ -1,4 +1,6 @@
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Tuple;
+import redis.clients.jedis.ZParams;
 
 import java.util.*;
 
@@ -18,7 +20,8 @@ public class Chapter03 {
         //string(conn);
 //        list(conn);
 //        set(conn);
-        hash(conn);
+//        hash(conn);
+        zset(conn);
     }
 
     private void string(Jedis conn){
@@ -178,5 +181,49 @@ public class Chapter03 {
         assert Objects.equals("2", conn.hget("new-hash-key2", "age"));
         conn.hincrByFloat("new-hash-key2", "age", 0.0D);
         assert Objects.equals("2.0", conn.hget("new-hash-key2", "age"));
+    }
+
+    private void zset(Jedis conn){
+        conn.del("zset-key");
+        System.out.println("=====有序集合的常用命令=====");
+        conn.zadd("zset-key", 89, "member01");
+        conn.zadd("zset-key", 99.5, "member02");
+        Long zcard = conn.zcard("zset-key");
+        assert 2 == zcard;
+        conn.zrem("zset-key", "member01");
+        conn.zadd("zset-key", 79, "member01");
+        conn.zadd("zset-key", 85.5, "member03");
+        conn.zincrby("zset-key", 2, "member03");
+        Long zcount = conn.zcount("zset-key", 80, 100);
+        assert 2 == zcount;
+        Long member01 = conn.zrank("zset-key", "member01");
+        System.out.println("member01 的排名是： " + member01);
+        Double member01Score = conn.zscore("zset-key", "member01");
+        System.out.println("member01 的成绩是： " + member01Score);
+        Set<String> zrange = conn.zrange("zset-key", 0, -1);
+        System.out.println(zrange);
+        Set<Tuple> tuples = conn.zrangeWithScores("zset-key", 0, -1);
+        tuples.forEach(tuple -> System.out.println(tuple.getElement() + " : " + tuple.getScore()));
+        System.out.println("=====有序集合的范围型和倒序（由大到小）API=====");
+        Long member02 = conn.zrevrank("zset-key", "member02");
+        assert 0 == member02;
+        Set<String> zrevrange = conn.zrevrange("zset-key", 0, -1);
+        System.out.println(zrevrange);
+        conn.del("zset-key-1");
+        conn.del("z-dest-key1");
+        conn.del("z-dest-key2");
+        conn.zadd("zset-key-1",33, "student01");
+        conn.zadd("zset-key-1",77, "member01");
+        ZParams zParams = new ZParams();
+        zParams.aggregate(ZParams.Aggregate.MAX);
+        //zparams 默认是求和
+        conn.zinterstore("z-dest-key1", zParams, "zset-key", "zset-key-1");
+        Set<Tuple> destKey1 = conn.zrangeWithScores("z-dest-key1", 0, -1);
+        destKey1.forEach(tuple -> System.out.println(tuple.getElement() + " : " + tuple.getScore()));
+        zParams.aggregate(ZParams.Aggregate.MIN);
+        //zparams 默认是求和
+        conn.zunionstore("z-dest-key2", zParams,"zset-key", "zset-key-1");
+        Set<Tuple> destKey2 = conn.zrangeWithScores("z-dest-key2", 0, -1);
+        destKey2.forEach(tuple -> System.out.println(tuple.getElement() + " : " + tuple.getScore()));
     }
 }
