@@ -17,7 +17,7 @@ public class Chapter03 {
 
     private void run(){
         Jedis conn = new Jedis("localhost");
-        //string(conn);
+//        string(conn);
 //        list(conn);
 //        set(conn);
 //        hash(conn);
@@ -47,10 +47,9 @@ public class Chapter03 {
         System.out.println("new-string-key:" + hellworld);
         String getrange05 = conn.getrange("new-string-key", 0, 5);
         System.out.println("helloworld(0,5):" + getrange05);
-        conn.setrange("new-string-key", 11, " xdq!");
-        assert conn.get("new-string-key").equals("hello world xdq!");
+        conn.setrange("new-string-key", 5, " xdq!");
+        assert conn.get("new-string-key").equals("hello xdq!");
         System.out.println(conn.get("new-string-key"));
-
         conn.del("bit-string-key");
         conn.set("bit-string-key", "1001");
         conn.setbit("bit-string-key", 1, "1");
@@ -209,6 +208,8 @@ public class Chapter03 {
         assert 0 == member02;
         Set<String> zrevrange = conn.zrevrange("zset-key", 0, -1);
         System.out.println(zrevrange);
+        Set<String> zrangeByScore = conn.zrangeByScore("zset-key", 87.5, 99.5, 0, 1);
+        System.out.println("zrangeByScore: " + zrangeByScore);
         conn.del("zset-key-1");
         conn.del("z-dest-key1");
         conn.del("z-dest-key2");
